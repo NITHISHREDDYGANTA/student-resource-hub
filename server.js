@@ -34,7 +34,7 @@ const Resource = mongoose.model("Resource", {
 
 // File Upload
 const storage = multer.diskStorage({
-    destination: "uploads/",
+    destination: "/tmp",
     filename: (req, file, cb) => {
         cb(null, Date.now() + file.originalname);
     }
