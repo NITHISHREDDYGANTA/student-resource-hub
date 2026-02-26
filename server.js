@@ -8,7 +8,7 @@ const path = require("path");
 const app = express();
 
 // MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/studentDB")
+mongoose.connect("mongodb+srv://nithishganta02_db_user:nithish126@cluster0.abcd.mongodb.net/studentDB")
 .then(()=>console.log("MongoDB Connected"))
 .catch(err=>console.log(err));
 
