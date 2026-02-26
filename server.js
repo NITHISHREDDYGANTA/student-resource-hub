@@ -8,7 +8,7 @@ const path = require("path");
 const app = express();
 
 // MongoDB Connection
-mongoose.connect("mongodb+srv://nithishganta02_db_user:nithish126@cluster0.wmtbjpq.mongodb.net/?appName=Cluster0/studentDB")
+mongoose.connect("mongodb+srv://nithishganta02_db_user:nithish126@cluster0.wmtbjpq.mongodb.net/studentDB?retryWrites=true&w=majority")
 .then(()=>console.log("MongoDB Connected"))
 .catch(err=>console.log(err));
 
@@ -51,15 +51,28 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-    const hash = await bcrypt.hash(req.body.password, 10);
-    await User.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: hash
-    });
-    res.redirect("/");
-});
+    try {
+        const hash = await bcrypt.hash(req.body.password, 10);
 
+        await User.create({
+            name: req.body.name,
+            email: req.body.email,
+            password: hash
+        });
+
+        res.redirect("/login");
+
+    } catch (err) {
+        res.send("Register Error");
+    }
+});
+app.get("/login", (req, res) => {
+    res.sendFile(__dirname + "/views/login.html");
+});
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/login");
+});
 app.post("/login", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (user && await bcrypt.compare(req.body.password, user.password)) {
@@ -159,7 +172,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 app.get("/download/:file", (req, res) => {
-    res.download(path.join(__dirname, "uploads", req.params.file));
+    res.download("/tmp/" + req.params.file);
 });
 
 const PORT = process.env.PORT || 3000;
