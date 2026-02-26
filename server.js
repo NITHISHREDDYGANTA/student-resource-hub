@@ -10,8 +10,7 @@ const app = express();
 // MongoDB Connection
 mongoose.connect("mongodb+srv://nithishganta02_db_user:nithish126@cluster0.wmtbjpq.mongodb.net/studentDB?retryWrites=true&w=majority")
 .then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log(err));
-
+.catch(err=>console.log("DB Error:", err));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: "secret",
