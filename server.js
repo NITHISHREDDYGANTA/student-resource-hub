@@ -15,17 +15,18 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// File Upload
+
+// ===== File Upload =====
 const storage = multer.diskStorage({
     destination: "/tmp",
     filename: (req, file, cb) => {
-        cb(null, Date.now() + file.originalname);
+        cb(null, Date.now() + "_" + file.originalname);
     }
 });
 const upload = multer({ storage });
 
 
-// Routes
+// ===== Routes =====
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/views/index.html");
 });
@@ -39,7 +40,7 @@ app.get("/register", (req, res) => {
 });
 
 
-// Register
+// ===== Register =====
 app.post("/register", async (req, res) => {
 
     let users = [];
@@ -62,7 +63,7 @@ app.post("/register", async (req, res) => {
 });
 
 
-// Login
+// ===== Login =====
 app.post("/login", async (req, res) => {
 
     let users = [];
@@ -82,7 +83,7 @@ app.post("/login", async (req, res) => {
 });
 
 
-// Dashboard
+// ===== Dashboard =====
 app.get("/dashboard", (req, res) => {
 
     let resources = [];
@@ -96,43 +97,163 @@ app.get("/dashboard", (req, res) => {
     resources.forEach(r => {
         cards += `
         <div class="col-md-4 mb-4">
-            <div class="card shadow h-100">
+            <div class="card shadow-lg h-100">
                 <div class="card-body">
-                    <h5>${r.title}</h5>
-                    <p>${r.subject}</p>
-                    <a href="/download/${r.file}" class="btn btn-primary">Download</a>
+                    <h5 class="card-title">${r.title}</h5>
+                    <p class="card-text text-muted">${r.subject}</p>
+
+                    <a href="/download/${r.file}" class="btn btn-success">
+                        <i class="fa fa-download"></i> Download
+                    </a>
                 </div>
             </div>
         </div>
         `;
     });
 
+
     res.send(`
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!DOCTYPE html>
+<html>
 
-    <div class="container mt-4">
+<head>
 
-    <h3>Dashboard</h3>
+<title>Dashboard</title>
 
-    <a href="/upload" class="btn btn-warning">Upload</a>
-    <a href="/logout" class="btn btn-danger">Logout</a>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 
-    <div class="row mt-3">
-    ${cards}
-    </div>
+<style>
 
-    </div>
-    `);
+body{
+background: linear-gradient(135deg,#667eea,#764ba2);
+min-height:100vh;
+color:white;
+}
+
+.navbar{
+background: rgba(0,0,0,0.3);
+backdrop-filter: blur(10px);
+}
+
+.card{
+border:none;
+border-radius:15px;
+transition:0.3s;
+}
+
+.card:hover{
+transform: translateY(-5px);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark p-3">
+<div class="container">
+
+<h4>📚 Student Resource Hub</h4>
+
+<div>
+<a href="/upload" class="btn btn-warning me-2">
+<i class="fa fa-upload"></i> Upload
+</a>
+
+<a href="/logout" class="btn btn-danger">
+<i class="fa fa-sign-out"></i> Logout
+</a>
+</div>
+
+</div>
+</nav>
+
+
+<div class="container mt-4">
+
+<h3 class="mb-4">Available Downloads</h3>
+
+<div class="row">
+
+${cards}
+
+</div>
+
+</div>
+
+</body>
+</html>
+`);
 });
 
 
-// Upload Page
+// ===== Upload Page =====
 app.get("/upload", (req, res) => {
-    res.sendFile(__dirname + "/views/upload.html");
+
+    res.send(`
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Upload</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+background: linear-gradient(135deg,#667eea,#764ba2);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.card{
+border-radius:15px;
+padding:30px;
+width:400px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h3 class="text-center mb-3">Upload Resource</h3>
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+
+<input name="title" class="form-control mb-3" placeholder="Title">
+
+<input name="subject" class="form-control mb-3" placeholder="Subject">
+
+<input type="file" name="file" class="form-control mb-3">
+
+<button class="btn btn-primary w-100">Upload</button>
+
+</form>
+
+<br>
+
+<a href="/dashboard" class="btn btn-secondary w-100">Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>
+`);
 });
 
 
-// Upload
+// ===== Upload =====
 app.post("/upload", upload.single("file"), (req, res) => {
 
     let resources = [];
@@ -153,13 +274,13 @@ app.post("/upload", upload.single("file"), (req, res) => {
 });
 
 
-// Download
+// ===== Download =====
 app.get("/download/:file", (req, res) => {
     res.download("/tmp/" + req.params.file);
 });
 
 
-// Logout
+// ===== Logout =====
 app.get("/logout", (req, res) => {
     req.session.destroy();
     res.redirect("/");
